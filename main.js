@@ -1,6 +1,6 @@
 /**
  * main.js - Точка входу SPA-застосунку LimbBot
- * Реалізує компонентний підхід та ієрархію модулів
+ * Адаптовано для GitHub Pages (/7webdesign/)
  */
 
 // Імпорт системних модулів
@@ -8,11 +8,11 @@ import { appState } from './store/state.js';
 import { appRouter } from './services/router.js';
 import { fetchBotReviews } from './services/api.js';
 
-// Імпорт UI-компонентів (Presentational)
+// Імпорт UI-компонентів
 import { Header } from './components/Header.js';
 import { Footer } from './components/Footer.js';
 
-// Імпорт сторінок-контейнерів (Container/Logic)
+// Імпорт сторінок-контейнерів
 import { HomePage } from './pages/Home.js';
 import { AboutPage } from './pages/About.js';
 import { ContactPage } from './pages/Contact.js';
@@ -22,30 +22,42 @@ const appRoot = document.getElementById('app');
 
 /**
  * Головна функція рендеру
- * Збирає сторінку з компонентів залежно від поточного стану
  */
 const renderApp = async (state) => {
     let pageContent = '';
 
-    // Клієнтський роутинг: вибір контенту сторінки
-    switch (state.currentPath) {
+    let activePath = state.currentPath; 
+    
+    if (activePath.startsWith('/7webdesign')) {
+        activePath = activePath.replace('/7webdesign', '');
+    }
+    
+    if (activePath === '') {
+        activePath = '/';
+    }
+
+    switch (activePath) {
         case '/':
             pageContent = HomePage();
             break;
         case '/about':
-            pageContent = AboutPage(); // Використовує перевикористовуваний компонент Card
+            pageContent = AboutPage(); 
             break;
         case '/reviews':
-            pageContent = ReviewsPage(state); // Передача даних (Props) у сторінку-контейнер
+            pageContent = ReviewsPage(state); 
             break;
         case '/contact':
             pageContent = ContactPage(state);
             break;
         default:
-            pageContent = `<section class="content-block"><h2>404 - Сторінку не знайдено</h2></section>`;
+            pageContent = `
+                <section class="content-block">
+                    <h2>404 - Сторінку не знайдено</h2>
+                    <p>Шлях "${activePath}" (оригінал: ${state.currentPath}) не існує.</p>
+                </section>`;
     }
 
-    // Формування фінальної структури DOM
+    // Збірка інтерфейсу
     appRoot.innerHTML = `
         ${Header()} 
         <main>
@@ -54,16 +66,13 @@ const renderApp = async (state) => {
         ${Footer()}
     `;
 
-    // Життєвий цикл: Логіка після рендеру для конкретних сторінок
-    attachPageListeners(state);
+
+    attachPageListeners(activePath, state); 
 };
 
-/**
- * Додаткові обробники подій для сторінок
- */
-const attachPageListeners = (state) => {
-    // Логіка форми на сторінці контактів
-    if (state.currentPath === '/contact') {
+// Онови також функцію обробників, щоб вона приймала activePath
+const attachPageListeners = (activePath, state) => {
+    if (activePath === '/contact') {
         const form = document.getElementById('ideaForm');
         if (form) {
             form.addEventListener('submit', (e) => {
@@ -73,21 +82,42 @@ const attachPageListeners = (state) => {
                     email: document.getElementById('email').value,
                     message: document.getElementById('message').value
                 };
-                // Оновлення стану (One-way data flow)
                 appState.setState({ ideas: [newIdea, ...state.ideas] });
             });
         }
     }
 
-    // Логіка завантаження даних API для сторінки відгуків
-    if (state.currentPath === '/reviews' && state.reviews.length === 0 && !state.isReviewsLoading && !state.reviewsError) {
+    if (activePath === '/reviews' && state.reviews.length === 0 && !state.isReviewsLoading && !state.reviewsError) {
         handleApiLoading();
     }
 };
 
 /**
- * Асинхронна логіка завантаження даних із зовнішнього API
+ * Обробники подій для динамічних елементів
  */
+const attachPageListeners = (state) => {
+    // Перевірка шляху для контактної форми
+    if (state.currentPath === '/7webdesign/contact') {
+        const form = document.getElementById('ideaForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newIdea = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    message: document.getElementById('message').value
+                };
+                appState.setState({ ideas: [newIdea, ...state.ideas] });
+            });
+        }
+    }
+
+    // Перевірка шляху для завантаження відгуків
+    if (state.currentPath === '/7webdesign/reviews' && state.reviews.length === 0 && !state.isReviewsLoading && !state.reviewsError) {
+        handleApiLoading();
+    }
+};
+
 const handleApiLoading = async () => {
     appState.setState({ isReviewsLoading: true });
     try {
@@ -98,8 +128,8 @@ const handleApiLoading = async () => {
     }
 };
 
-// Підписка на зміну стану: автоматичне перемальовування при будь-яких змінах
+// Підписка на оновлення
 appState.subscribe(renderApp);
 
-// Перший запуск застосунку
+// Початковий рендер
 renderApp(appState.getState());
