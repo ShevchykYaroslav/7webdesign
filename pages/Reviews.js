@@ -1,22 +1,15 @@
 import { Card } from '../components/Card.js';
 
 export const ReviewsPage = (state) => {
-    if (state.isReviewsLoading) return `<div class="content-block">Завантаження...</div>`;
-    if (state.reviewsError) return `<div class="content-block">Помилка: ${state.reviewsError}</div>`;
+    if (state.isReviewsLoading) return `<section class="content-block">Завантаження...</section>`;
+    if (state.reviewsError) return `<section class="content-block">Помилка: ${state.reviewsError}</section>`;
 
-    // ТУТ ВІДБУВАЄТЬСЯ ПОВТОРНЕ ВИКОРИСТАННЯ КОМПОНЕНТА!
+    // Повторне використання компонента!
     const reviewsHTML = state.reviews.map(review => Card({
-        subtitle: `Користувач: ${review.email}`,
-        title: `Тема: ${review.name}`,
-        content: `"${review.body}"`
+        subtitle: `Від: ${review.email}`,
+        title: review.name,
+        content: review.body
     })).join('');
 
-    return `
-        <section class="content-block">
-            <h2>Що кажуть про LimbBot</h2>
-            <div class="cards-container">
-                ${reviewsHTML}
-            </div>
-        </section>
-    `;
+    return `<section class="content-block"><h2>Відгуки користувачів</h2>${reviewsHTML}</section>`;
 };
