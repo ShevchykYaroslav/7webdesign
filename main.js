@@ -11,6 +11,17 @@ import { ReviewsPage } from './pages/Reviews.js';
 
 const appRoot = document.getElementById('app');
 
+// Запобігає надмірному виклику функцій (наприклад, при швидкому кліканні)
+const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(null, args);
+        }, delay);
+    };
+};
+
 // Супер-функція очищення адреси для GitHub Pages
 const getCleanPath = (rawPath) => {
     let clean = rawPath;
@@ -57,23 +68,28 @@ const renderApp = async (state) => {
 };
 
 const attachPageListeners = (activePath, state) => {
-    // Форма контактів
     if (activePath === '/contact') {
         const form = document.getElementById('ideaForm');
         if (form) {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
+            // ОПТИМІЗАЦІЯ 2: Використання debounce для обробки форми
+            const handleFormSubmit = debounce((e) => {
                 const newIdea = {
                     name: document.getElementById('name').value,
                     email: document.getElementById('email').value,
                     message: document.getElementById('message').value
                 };
                 appState.setState({ ideas: [newIdea, ...state.ideas] });
+                // Очищаємо форму після відправки (мінімізація пошуку в DOM)
+                form.reset();
+            }, 500); // Функція виконається лише через 500мс після останнього кліку
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault(); 
+                handleFormSubmit(e);
             });
         }
     }
 
-    // Завантаження API
     if (activePath === '/reviews' && state.reviews.length === 0 && !state.isReviewsLoading && !state.reviewsError) {
         appState.setState({ isReviewsLoading: true });
         fetchBotReviews()
