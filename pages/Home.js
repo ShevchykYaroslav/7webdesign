@@ -7,7 +7,7 @@ export const HomePage = () => {
             <div style="margin-top: 2rem;">
                 <img 
                     src="my-image.webp" 
-                    alt="Інтерфейс LimbBot" 
+                    alt="Демонстрація інтерфейсу бота LimbBot з його основними функціями" 
                     loading="lazy" 
                     width="400" 
                     height="400"

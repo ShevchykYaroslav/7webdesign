@@ -1,10 +1,9 @@
 export const ContactPage = (state) => {
-    // Генеруємо HTML для збережених ідей
     const ideasHTML = state.ideas.map(idea => `
-        <div class="card" style="margin-top: 1rem; text-align: left;">
-            <h4 style="color: #2ecc71;">💡 ${idea.name}</h4>
+        <article class="card" style="margin-top: 1rem; text-align: left;">
+            <h4 style="color: #5865F2;">💡 ${idea.name}</h4>
             <p>${idea.message}</p>
-        </div>
+        </article>
     `).join('');
 
     return `
@@ -12,19 +11,23 @@ export const ContactPage = (state) => {
             <h2>Контактна форма</h2>
             <form id="ideaForm" class="contact-form">
                 <div class="form-group">
-                    <input type="text" id="name" placeholder="Ім'я" required>
+                    <label for="name" style="display: block; margin-bottom: 0.5rem;">Ваше ім'я</label>
+                    <input type="text" id="name" placeholder="Введіть ім'я" required aria-required="true">
                 </div>
                 
                 <div class="form-group">
-                    <input type="email" id="email" placeholder="Email" required>
+                    <label for="email" style="display: block; margin-bottom: 0.5rem;">Ваш Email</label>
+                    <input type="email" id="email" placeholder="Введіть email" required aria-required="true">
                 </div>
                 
                 <div class="form-group">
-                    <textarea id="message" rows="3" placeholder="Ваша ідея" required></textarea>
+                    <label for="message" style="display: block; margin-bottom: 0.5rem;">Ваша ідея</label>
+                    <textarea id="message" rows="3" placeholder="Опишіть вашу ідею" required aria-required="true"></textarea>
                 </div>
-                <button type="submit">Надіслати</button>
+                <button type="submit" aria-label="Надіслати ідею розробникам">Надіслати</button>
             </form>
-            <div style="margin-top: 2rem;">
+            
+            <div style="margin-top: 2rem;" aria-live="polite">
                 <h3>Залишені пропозиції:</h3>
                 ${ideasHTML}
             </div>
